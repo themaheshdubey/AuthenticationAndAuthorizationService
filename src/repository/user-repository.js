@@ -7,6 +7,20 @@ class UserRepository {
     }
 
 
+    async getById(userId) {
+        try {
+            const user = await User.findByPk(userId , {
+                attributes: ['email' , 'id']
+            });
+            return user;
+        } catch (error) {
+            console.log('Something wrong at repository layer');
+            throw error;
+        }
+    }
+
+
+
     async create(data) {
         try {
             const result = await User.create(data);

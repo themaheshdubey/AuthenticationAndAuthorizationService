@@ -161,23 +161,40 @@ const signIn = async (req, res) => {
 
 const isAuthenticated = async (req, res) => {
     try {
+        // Retrieve token from 'x-access-token' header
         const token = req.headers['x-access-token'];
+
+        // Check if token is provided
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                err: {},
+                message: 'Token is required'
+            });
+        }
+
+        // Call the service to validate the token
         const response = await userService.isAuthenticated(token);
+
+        // If the token is valid, respond with success
         return res.status(200).json({
             success: true,
             err: {},
             data: response,
-            message: 'user is authenticated and token is valid'
+            message: 'User is authenticated and token is valid'
         });
     } catch (error) {
+        // Handle errors and respond with a 500 status
         return res.status(500).json({
-            message: 'Something went wrong',
-            data: {},
             success: false,
-            err: error
+            err: error,
+            message: 'Something went wrong'
         });
     }
 };
+
+module.exports = { isAuthenticated };
+
   
 
 module.exports = {

@@ -11,6 +11,8 @@ router.patch('/user/:id' , UserController.updateUser);
 router.post('/sign-in' , UserController.signIn);
 
 
+router.get('/auth/validate' , UserController.isAuthenticated);
+
 
 
 module.exports = router;
