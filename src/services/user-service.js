@@ -46,6 +46,25 @@ class UserService {
     }
 
 
+    async isAdmin(userId) {
+        try {
+            // Fetch the role name of userId
+            const role = await userRepository.getRoleName(userId);
+
+            console.log(role);
+
+            // Check if the user's role is 'admin'
+            if (role !== 'admin') {
+                throw new Error('User is not an admin');
+            }
+
+            return true;
+        } catch (error) {
+            throw error;   
+        }
+    }
+
+
 
     createToken(user) {
         try {
@@ -77,7 +96,6 @@ class UserService {
             throw error;
         }
     }
-
 
 
     async create(data) {

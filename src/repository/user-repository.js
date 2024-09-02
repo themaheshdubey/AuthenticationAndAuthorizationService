@@ -1,10 +1,28 @@
-const {User} = require('../models/index');
+const {User , Role} = require('../models/index');
 
 class UserRepository {
 
     async findByEmail(email) {
         return User.findOne({ where: { email } });
     }
+
+
+    async getRoleName(userId) {
+        try {
+            const user = await User.findByPk(userId, {
+                include: [{
+                    model: Role,
+                    attributes: ['roleName'],
+                    required: true
+                }]
+            });
+            return user.Role.roleName;
+        } catch (error) {
+            console.error('Error fetching user by ID:', error.message);
+            throw new Error('Error fetching user by ID');
+        }
+    }
+
 
 
     async getById(userId) {

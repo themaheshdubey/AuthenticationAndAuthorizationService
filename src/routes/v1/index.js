@@ -12,7 +12,7 @@ router.post('/sign-in' , UserController.signIn);
 
 
 router.get('/auth/validate' , UserController.isAuthenticated);
-
+router.get('/user/roles/checkAdmin' , UserController.isAdmin);
 
 
 module.exports = router;
