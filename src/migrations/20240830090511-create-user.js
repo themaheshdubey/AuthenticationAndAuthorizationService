@@ -25,11 +25,7 @@ module.exports = {
           },
           onUpdate: 'CASCADE',
           onDelete: 'CASCADE',
-          allowNull: false
-      },
-      airlineId: {
-          type: Sequelize.INTEGER,
-          allowNull: true
+          defaultValue: 5
       },
       createdAt: {
           type: Sequelize.DATE,

@@ -31,11 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     roleId: {
         type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    airlineId: {
-        type: DataTypes.INTEGER,
-        allowNull: true // Nullable for non-airlineAdmin roles
+        defaultValue: 5
     }
   }, {
     sequelize,

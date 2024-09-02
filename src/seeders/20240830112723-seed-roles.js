@@ -10,22 +10,16 @@ module.exports = {
           updatedAt: new Date()
       },
       {
-          roleName: 'airlineAdmin',
-          createdAt: new Date(),
-          updatedAt: new Date()
-      },
-      {
           roleName: 'normal user',
           createdAt: new Date(),
           updatedAt: new Date()
       }
   ], {});
-
   },
 
   async down (queryInterface, Sequelize) {
     await queryInterface.bulkDelete('Roles', {
-      roleName: ['admin', 'airlineAdmin', 'normal user']
+      roleName: ['admin' , 'normal user']
   }, {});
   }
 };

@@ -129,13 +129,24 @@ const getAllUsers = async (req, res) => {
 const signIn = async (req, res) => {
     try {
       const { email, password } = req.body;
-      const { token } = await userService.signIn(email, password);
+
+      if (!email || !password) {
+          return res.status(400).json({
+              success: false,
+              err: 'Email or password missing in the request',
+              data: {},
+              message: 'Email or password missing'
+          });
+      }
+
+      const token = await userService.signIn(email, password);
       return res.status(200).json({
         data: { token },
         success: true,
         message: 'Successfully signed in',
         err: {}
       });
+
     } catch (error) {
       console.error('Error in signIn:', error.message);
       return res.status(401).json({
@@ -145,7 +156,28 @@ const signIn = async (req, res) => {
         err: error.message
       });
     }
-  };
+};
+
+
+const isAuthenticated = async (req, res) => {
+    try {
+        const token = req.headers['x-access-token'];
+        const response = await userService.isAuthenticated(token);
+        return res.status(200).json({
+            success: true,
+            err: {},
+            data: response,
+            message: 'user is authenticated and token is valid'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Something went wrong',
+            data: {},
+            success: false,
+            err: error
+        });
+    }
+};
   
 
 module.exports = {
@@ -154,5 +186,6 @@ module.exports = {
     getUser,
     updateUser,
     getAllUsers,
-    signIn
+    signIn,
+    isAuthenticated
 };
