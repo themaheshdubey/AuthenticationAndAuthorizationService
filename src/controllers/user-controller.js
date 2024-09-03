@@ -21,8 +21,12 @@ const createUser = async (req, res) => {
     }
 };
 
+
 const deleteUser = async (req, res) => {
     try {
+
+        console.log(req.params.id);
+
         // Retrieve the token from headers
         const token = req.headers['x-access-token'];
 
@@ -47,7 +51,7 @@ const deleteUser = async (req, res) => {
 
         const userIdToDelete = req.params.id;
 
-        // Check if requester is authorized to delete this user
+        // Ensure both IDs are of the same type for accurate comparison
         if (String(requesterUserId) !== String(userIdToDelete)) {
             return res.status(403).json({
                 success: false,
@@ -58,26 +62,29 @@ const deleteUser = async (req, res) => {
         const response = await userService.delete(userIdToDelete);
         if (!response) {
             return res.status(404).json({
+                data: {},
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
+                err: {}
             });
         }
 
         return res.status(200).json({
+            data: response,
             success: true,
-            message: 'Successfully deleted the user'
+            message: 'Successfully deleted the user',
+            err: {}
         });
     } catch (error) {
         console.error('Error in deleteUser:', error.message);
         return res.status(500).json({
+            data: {},
             success: false,
             message: 'Unable to delete the user',
-            error: error.message
+            err: error.message
         });
     }
 };
-
-
 
 
 const updateUser = async (req, res) => {
@@ -267,10 +274,12 @@ const isAdmin = async (req, res) => {
         // Handle general server errors
         return res.status(500).json({
             success: false,
-            message: 'Something went wrong'
+            message: 'An error occurred while checking admin status',
+            err: error.message
         });
     }
 };
+
 
 
   

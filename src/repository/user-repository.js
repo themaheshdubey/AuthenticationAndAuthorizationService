@@ -44,18 +44,21 @@ class UserRepository {
         }
     }
 
-    async delete(id) {
+    async deleteUser(userId) {
         try {
-            const result = await User.destroy({ where: { id } });
-            if (result === 0) {
-                console.warn(`No record found to delete with id ${id}`);
+            // Find the user by ID and delete
+            const user = await User.findByPk(userId);
+            if (!user) {
+                return null; // User not found
             }
-            return result > 0;
+            await user.destroy();
+            return user; 
         } catch (error) {
-            console.error("Error in UserRepository delete method:", error.message);
-            throw error;
+            console.error('Error in deleteUser:', error);
+            throw error; 
         }
-    }
+    };
+    
 
     async update(id, data) {
         try {

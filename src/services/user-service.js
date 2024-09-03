@@ -12,7 +12,7 @@ class UserService {
             const user = await userRepository.findByEmail(email);
 
             // step 2-> compare incoming plain password with stores encrypted password
-            const passwordsMatch = this.checkPassword(plainPassword, user.password);
+            const passwordsMatch = await this.checkPassword(plainPassword, user.password);
 
             if(!passwordsMatch) {
                 console.log("Password doesn't match");
@@ -20,7 +20,7 @@ class UserService {
             }
 
             // step 3-> if passwords match then create a token and send it to the user
-            const newJWT = this.createToken({email: user.email, id: user.id});
+            const newJWT = await this.createToken({email: user.email, id: user.id});
             return newJWT;
         } catch (error) {
             console.log("Something went wrong in the sign in process");
@@ -30,7 +30,7 @@ class UserService {
 
     async isAuthenticated(token) {
         try {
-            const response = this.verifyToken(token);
+            const response = await this.verifyToken(token);
             if(!response) {
                 throw {error: 'Invalid token'}
             }
@@ -48,23 +48,17 @@ class UserService {
 
     async isAdmin(userId) {
         try {
-            // Fetch the role name of userId
             const role = await userRepository.getRoleName(userId);
-
-            // Check if the user's role is 'admin'
-            if (role !== 'admin') {
-                throw new Error('User is not an admin');
-            }
-
-            return true;
+            return role === 'admin';
         } catch (error) {
-            throw error;   
+            console.error('Error in isAdmin:', error.message); 
+            throw new Error('Failed to determine if user is an admin');   
         }
     }
 
-    createToken(user) {
+    async createToken(user) {
         try {
-            const result = jwt.sign(user, JWT_KEY, {expiresIn: '1d'});
+            const result = await jwt.sign(user, JWT_KEY, {expiresIn: '1d'});
             return result;
         } catch (error) {
             console.log("Something went wrong in token creation");
@@ -73,9 +67,9 @@ class UserService {
     }
 
 
-    verifyToken(token) {
+    async verifyToken(token) {
         try {
-            const response = jwt.verify(token, JWT_KEY);
+            const response = await jwt.verify(token, JWT_KEY);
             return response;
         } catch (error) {
             console.log("Something went wrong in token validation", error);
@@ -84,9 +78,9 @@ class UserService {
     }
 
 
-    checkPassword(userInputPlainPassword, encryptedPassword) {
+    async checkPassword(userInputPlainPassword, encryptedPassword) {
         try {
-            return bcrypt.compareSync(userInputPlainPassword, encryptedPassword);
+            return await bcrypt.compareSync(userInputPlainPassword, encryptedPassword);
         } catch (error) {
             console.log("Something went wrong in password comparison");
             throw error;
@@ -108,7 +102,7 @@ class UserService {
 
     async delete(id) {
         try {
-            const response = await userRepository.delete(id);
+            const response = await userRepository.deleteUser(id);
             return response;
         } catch (error) {
             console.error("Error in UserService delete method:", error.message);
