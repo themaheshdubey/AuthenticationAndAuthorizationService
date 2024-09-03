@@ -51,8 +51,6 @@ class UserService {
             // Fetch the role name of userId
             const role = await userRepository.getRoleName(userId);
 
-            console.log(role);
-
             // Check if the user's role is 'admin'
             if (role !== 'admin') {
                 throw new Error('User is not an admin');
@@ -63,8 +61,6 @@ class UserService {
             throw error;   
         }
     }
-
-
 
     createToken(user) {
         try {
@@ -116,26 +112,6 @@ class UserService {
             return response;
         } catch (error) {
             console.error("Error in UserService delete method:", error.message);
-            throw error;
-        }
-    }
-
-    async get(id) {
-        try {
-            const response = await userRepository.get(id);
-            return response;
-        } catch (error) {
-            console.error("Error in UserService get method:", error.message);
-            throw error;
-        }
-    }
-
-    async getAll(options = {}) {
-        try {
-            const response = await userRepository.getAll(options);
-            return response;
-        } catch (error) {
-            console.error("Error in UserService getAll method:", error.message);
             throw error;
         }
     }

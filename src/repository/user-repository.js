@@ -6,7 +6,6 @@ class UserRepository {
         return User.findOne({ where: { email } });
     }
 
-
     async getRoleName(userId) {
         try {
             const user = await User.findByPk(userId, {
@@ -23,8 +22,6 @@ class UserRepository {
         }
     }
 
-
-
     async getById(userId) {
         try {
             const user = await User.findByPk(userId , {
@@ -36,8 +33,6 @@ class UserRepository {
             throw error;
         }
     }
-
-
 
     async create(data) {
         try {
@@ -58,29 +53,6 @@ class UserRepository {
             return result > 0;
         } catch (error) {
             console.error("Error in UserRepository delete method:", error.message);
-            throw error;
-        }
-    }
-
-    async get(id) {
-        try {
-            const result = await User.findByPk(id);
-            if (!result) {
-                console.warn(`No record found with id ${id}`);
-            }
-            return result;
-        } catch (error) {
-            console.error("Error in UserRepository get method:", error.message);
-            throw error;
-        }
-    }
-
-    async getAll(options = {}) {
-        try {
-            const result = await User.findAll(options);
-            return result;
-        } catch (error) {
-            console.error("Error in UserRepository getAll method:", error.message);
             throw error;
         }
     }

@@ -23,62 +23,98 @@ const createUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
-        const response = await userService.delete(req.params.id);
-        if (!response) {
-            return res.status(404).json({
-                data: {},
+        // Retrieve the token from headers
+        const token = req.headers['x-access-token'];
+
+        // Check if token is provided
+        if (!token) {
+            return res.status(400).json({
                 success: false,
-                message: 'User not found',
-                err: {}
+                message: 'Token is required'
             });
         }
+
+        // Authenticate the user and get user ID
+        const requesterUserId = await userService.isAuthenticated(token);
+
+        // If token is invalid, respond with 401 Unauthorized
+        if (!requesterUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid token'
+            });
+        }
+
+        const userIdToDelete = req.params.id;
+
+        // Check if requester is authorized to delete this user
+        if (String(requesterUserId) !== String(userIdToDelete)) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to delete this user'
+            });
+        }
+
+        const response = await userService.delete(userIdToDelete);
+        if (!response) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
         return res.status(200).json({
-            data: response,
             success: true,
-            message: 'Successfully deleted a user',
-            err: {}
+            message: 'Successfully deleted the user'
         });
     } catch (error) {
         console.error('Error in deleteUser:', error.message);
         return res.status(500).json({
-            data: {},
             success: false,
-            message: 'Unable to delete a user',
-            err: error.message
+            message: 'Unable to delete the user',
+            error: error.message
         });
     }
 };
 
-const getUser = async (req, res) => {
-    try {
-        const response = await userService.get(req.params.id);
-        if (!response) {
-            return res.status(404).json({
-                data: {},
-                success: false,
-                message: 'User not found',
-                err: {}
-            });
-        }
-        return res.status(200).json({
-            data: response,
-            success: true,
-            message: 'Successfully fetched a user',
-            err: {}
-        });
-    } catch (error) {
-        console.error('Error in getUser:', error.message);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: 'Unable to fetch a user',
-            err: error.message
-        });
-    }
-};
+
+
 
 const updateUser = async (req, res) => {
     try {
+
+        // Retrieve the token from headers
+        const token = req.headers['x-access-token'];
+
+        // Check if token is provided
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: 'Token is required'
+            });
+        }
+
+        // Authenticate the user and get user ID
+        const requesterUserId = await userService.isAuthenticated(token);
+
+        // If token is invalid, respond with 401 Unauthorized
+        if (!requesterUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid token'
+            });
+        }
+
+        const userIdToEdit = req.params.id;
+
+        // Ensure both IDs are of the same type for accurate comparison
+        if (String(requesterUserId) !== String(userIdToEdit)) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to edit this user'
+            });
+        }
+
         const response = await userService.update(req.params.id, req.body);
         if (!response) {
             return res.status(404).json({
@@ -95,36 +131,17 @@ const updateUser = async (req, res) => {
             err: {}
         });
     } catch (error) {
-        console.error('Error in updateUser:', error.message);
+        // Log full error details for debugging purposes
+        console.error('Error in updateUser:', error);
+
         return res.status(500).json({
             data: {},
             success: false,
-            message: 'Unable to update a user',
-            err: error.message
+            message: 'Unable to update the user',
+            err: error.message || 'Internal server error'
         });
     }
 };
-
-const getAllUsers = async (req, res) => {
-    try {
-        const response = await userService.getAll();
-        return res.status(200).json({
-            data: response,
-            success: true,
-            message: 'Successfully fetched all users',
-            err: {}
-        });
-    } catch (error) {
-        console.error('Error in getAllUsers:', error.message);
-        return res.status(500).json({
-            data: {},
-            success: false,
-            message: 'Unable to fetch all users',
-            err: error.message
-        });
-    }
-};
-
 
 const signIn = async (req, res) => {
     try {
@@ -168,13 +185,21 @@ const isAuthenticated = async (req, res) => {
         if (!token) {
             return res.status(400).json({
                 success: false,
-                err: {},
+                err: {message: 'Token is missing'},
                 message: 'Token is required'
             });
         }
 
         // Call the service to validate the token
         const response = await userService.isAuthenticated(token);
+        if(!response) {
+            return res.status(401).json({
+                success: false,
+                err: { message: 'Invalid token or user not registered' },
+                data: response,
+                message: 'User is not authenticated'
+            });
+        }
 
         // If the token is valid, respond with success
         return res.status(200).json({
@@ -187,7 +212,7 @@ const isAuthenticated = async (req, res) => {
         // Handle errors and respond with a 500 status
         return res.status(500).json({
             success: false,
-            err: error,
+            err: { message: error.message },
             message: 'Something went wrong'
         });
     }
@@ -210,10 +235,18 @@ const isAdmin = async (req, res) => {
         // Authenticate the user and get user ID
         const userId = await userService.isAuthenticated(token);
 
+        // If token is invalid, respond with 401 Unauthorized
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid token'
+            });
+        }
+
         // Check if the user is an admin
         const isAdmin = await userService.isAdmin(userId);
 
-
+        // If the user is not an admin, respond with 403 Forbidden
         if (!isAdmin) {
             return res.status(403).json({
                 success: false,
@@ -221,20 +254,17 @@ const isAdmin = async (req, res) => {
             });
         }
 
+        // If the user is an admin, respond with success
         return res.status(200).json({
             success: true,
             message: 'User is an admin'
         });
 
     } catch (error) {
+        // Log error details (optional, for debugging purposes)
+        console.error('Error in isAdmin:', error);
 
-        if (error.message === 'User is not an admin') {
-            return res.status(403).json({
-                success: false,
-                message: 'User is not an admin'
-            });
-        }
-
+        // Handle general server errors
         return res.status(500).json({
             success: false,
             message: 'Something went wrong'
@@ -242,14 +272,13 @@ const isAdmin = async (req, res) => {
     }
 };
 
+
   
 
 module.exports = {
     createUser,
     deleteUser,
-    getUser,
     updateUser,
-    getAllUsers,
     signIn,
     isAuthenticated,
     isAdmin
