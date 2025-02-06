@@ -87,6 +87,14 @@ class UserService {
         }
     }
 
+    async getById(id) {
+        try {
+            const user = await userRepository.getById(id);
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    }
 
     async create(data) {
         try {

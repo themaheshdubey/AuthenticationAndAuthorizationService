@@ -1,6 +1,25 @@
 const UserService = require('../services/user-service');
 const userService = new UserService();
 
+const getUser = async(req , res) => {
+    try {
+        const user = await userService.getById(req.params.id);
+        return res.status(201).json({
+            data: user,
+            success: true,
+            message: 'Successfully feteched a user',
+            err: {}
+        });
+    } catch (error) {
+        return res.status(500).json({
+            data: {},
+            success: false,
+            message: 'Cannot fetch user details',
+            err: err.message
+        })
+    }
+}
+
 const createUser = async (req, res) => {
     try {
         const user = await userService.create(req.body);
@@ -285,6 +304,7 @@ const isAdmin = async (req, res) => {
   
 
 module.exports = {
+    getUser,
     createUser,
     deleteUser,
     updateUser,
